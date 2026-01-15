@@ -1,0 +1,168 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ organisation.name }} - CallFairy{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'organisations_list' %}" class="text-indigo-600 hover:text-indigo-800 mb-4 inline-block">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Organisations
+    </a>
+    
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-building mr-3"></i>{{ organisation.name }}
+                <span class="ml-3 px-3 py-1 text-sm font-semibold rounded-full {% if organisation.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {% if organisation.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </h1>
+            {% if organisation.description %}
+            <p class="text-gray-600 mt-2">{{ organisation.description }}</p>
+            {% endif %}
+        </div>
+        
+        {% if can_manage %}
+        <a href="{% url 'organisation_edit' organisation.id %}" class="btn-primary text-white px-6 py-3 rounded-lg font-medium inline-flex items-center">
+            <i class="fas fa-edit mr-2"></i>Edit Organisation
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Information -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Details Card -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Organisation Details</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Address</label>
+                    <p class="text-gray-900">{{ organisation.address|default:"Not specified" }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">City</label>
+                    <p class="text-gray-900">{{ organisation.city|default:"Not specified" }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">State</label>
+                    <p class="text-gray-900">{{ organisation.state|default:"Not specified" }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Country</label>
+                    <p class="text-gray-900">{{ organisation.country|default:"Not specified" }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Pincode</label>
+                    <p class="text-gray-900">{{ organisation.pincode|default:"Not specified" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Members Card -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">
+                Members ({{ member_count }})
+            </h2>
+            
+            {% if members %}
+            <div class="space-y-3">
+                {% for membership in members %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <i class="fas fa-user text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">{{ membership.user.name }}</p>
+                            <p class="text-sm text-gray-500">{{ membership.user.email }}</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {{ membership.user.get_role_display_name }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-4">No members yet</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Agent Card -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Agent</h2>
+            
+            {% if agent %}
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                        <i class="fas fa-user-tie text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-900">{{ agent.user.name }}</p>
+                        <p class="text-sm text-gray-500">{{ agent.user.email }}</p>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t">
+                    <p class="text-sm text-gray-500 mb-2">
+                        <i class="fas fa-calendar mr-1"></i>Assigned: {{ agent.assigned_at|date:"M d, Y" }}
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-user-shield mr-1"></i>By: {{ agent.assigned_by.name }}
+                    </p>
+                </div>
+                
+                {% if is_superadmin %}
+                <div class="pt-4 border-t space-y-2">
+                    <a href="{% url 'agent_permissions' agent.user.id %}" class="block w-full text-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-key mr-2"></i>Manage Permissions
+                    </a>
+                    <a href="{% url 'agent_revoke' agent.user.id %}" class="block w-full text-center bg-red-50 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors">
+                        <i class="fas fa-user-slash mr-2"></i>Revoke Agent
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-user-slash text-4xl text-gray-300 mb-2"></i>
+                <p class="text-gray-500">No agent assigned</p>
+                {% if is_superadmin %}
+                <a href="{% url 'agent_assign' %}" class="btn-primary text-white px-4 py-2 rounded-lg font-medium inline-block mt-3">
+                    <i class="fas fa-user-plus mr-2"></i>Assign Agent
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="bg-white rounded-lg card-shadow p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Stats</h2>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600"><i class="fas fa-users mr-2"></i>Members</span>
+                    <span class="font-bold text-gray-900">{{ member_count }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600"><i class="fas fa-user-tie mr-2"></i>Agent</span>
+                    <span class="font-bold text-gray-900">{% if agent %}1{% else %}0{% endif %}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600"><i class="fas fa-check-circle mr-2"></i>Status</span>
+                    <span class="font-bold {% if organisation.is_active %}text-green-600{% else %}text-gray-600{% endif %}">
+                        {% if organisation.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

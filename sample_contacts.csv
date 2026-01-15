@@ -1,0 +1,5 @@
+name,phone_number,email,tags,company,notes
+John Doe,+12223334444,john@example.com,customer,Acme Corp,Premium customer
+Jane Smith,+15556667777,jane@example.com,"customer,vip",Tech Solutions,Important client
+Bob Johnson,+19998887777,bob@example.com,lead,StartupXYZ,Follow up needed
+Alice Williams,+14445556666,alice@example.com,"customer,returning",Design Co,Interested in new features

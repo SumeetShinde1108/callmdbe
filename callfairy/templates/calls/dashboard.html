@@ -1,0 +1,209 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - CallFairy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Welcome Section -->
+    <div class="bg-white overflow-hidden shadow-xl rounded-lg">
+        <div class="p-6 gradient-bg text-white">
+            <h1 class="text-3xl font-bold">Welcome back, {{ user.name }}!</h1>
+            <p class="mt-2 text-purple-100">Manage your AI-powered voice campaigns from your dashboard</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Total Contacts -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-address-book text-4xl text-blue-500"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                                Total Contacts
+                            </dt>
+                            <dd class="text-2xl font-semibold text-gray-900">
+                                {{ stats.total_contacts }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="{% url 'contacts_list' %}" class="text-sm font-medium text-purple-600 hover:text-purple-500">
+                    View all <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Total Calls -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-phone text-4xl text-green-500"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                                Total Calls
+                            </dt>
+                            <dd class="text-2xl font-semibold text-gray-900">
+                                {{ stats.total_calls }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="{% url 'calls_list' %}" class="text-sm font-medium text-purple-600 hover:text-purple-500">
+                    View all <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Active Bulk Calling -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-layer-group text-4xl text-purple-500"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                                Bulk Calls
+                            </dt>
+                            <dd class="text-2xl font-semibold text-gray-900">
+                                {{ stats.total_batches }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="{% url 'batches_list' %}" class="text-sm font-medium text-purple-600 hover:text-purple-500">
+                    View all <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-line text-4xl text-yellow-500"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">
+                                Success Rate
+                            </dt>
+                            <dd class="text-2xl font-semibold text-gray-900">
+                                {{ stats.success_rate }}%
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <span class="text-sm text-gray-500">
+                    Based on completed calls
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="{% url 'make_call' %}" class="flex flex-col items-center justify-center p-6 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition-all duration-200">
+                <i class="fas fa-phone-alt text-3xl text-purple-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Make Single Call</span>
+            </a>
+            
+            <a href="{% url 'create_campaign' %}" class="flex flex-col items-center justify-center p-6 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition-all duration-200">
+                <i class="fas fa-bullhorn text-3xl text-purple-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Bulk Calling</span>
+            </a>
+            
+            <a href="{% url 'import_csv' %}" class="flex flex-col items-center justify-center p-6 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition-all duration-200">
+                <i class="fas fa-file-csv text-3xl text-purple-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Import Contacts</span>
+            </a>
+            
+            <a href="{% url 'contacts_list' %}?action=add" class="flex flex-col items-center justify-center p-6 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition-all duration-200">
+                <i class="fas fa-user-plus text-3xl text-purple-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Add Contact</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Recent Calls -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Calls</h2>
+            {% if recent_calls %}
+            <div class="space-y-4">
+                {% for call in recent_calls %}
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-phone text-2xl {% if call.status == 'completed' %}text-green-500{% elif call.status == 'failed' %}text-red-500{% else %}text-yellow-500{% endif %}"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ call.phone_number }}</p>
+                            <p class="text-xs text-gray-500">{{ call.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full {% if call.status == 'completed' %}bg-green-100 text-green-800{% elif call.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ call.status|title }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">No calls yet. Make your first call!</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Bulk Calls -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Bulk Calls</h2>
+            {% if recent_batches %}
+            <div class="space-y-4">
+                {% for batch in recent_batches %}
+                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-layer-group text-2xl text-purple-500"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ batch.label }}</p>
+                            <p class="text-xs text-gray-500">{{ batch.total_contacts }} contacts</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full {% if batch.status == 'completed' %}bg-green-100 text-green-800{% elif batch.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ batch.status|title }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">No bulk calls yet. Create your first bulk call batch!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ batch.label }} - Bulk Call Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'batches_list' %}" class="text-gray-500 hover:text-gray-700">
+                    ← Back
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">{{ batch.label }}</h1>
+                <span class="px-3 py-1 text-sm font-medium rounded-full
+                    {% if batch.status == 'completed' %}bg-green-100 text-green-800
+                    {% elif batch.status == 'failed' %}bg-red-100 text-red-800
+                    {% elif batch.status == 'processing' %}bg-blue-100 text-blue-800
+                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ batch.status|title }}
+                </span>
+            </div>
+            <p class="mt-2 text-gray-600">Created on {{ batch.created_at|date:"M d, Y H:i" }}</p>
+        </div>
+        <button onclick="refreshStatus()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+            Refresh Status
+        </button>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-sm text-gray-500 mb-1">Total Calls</div>
+            <div class="text-3xl font-bold text-gray-900">{{ total_calls }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-sm text-gray-500 mb-1">Completed</div>
+            <div class="text-3xl font-bold text-green-600">{{ completed_calls }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-sm text-gray-500 mb-1">In Progress</div>
+            <div class="text-3xl font-bold text-blue-600">{{ in_progress_calls }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <div class="text-sm text-gray-500 mb-1">Failed</div>
+            <div class="text-3xl font-bold text-red-600">{{ failed_calls }}</div>
+        </div>
+    </div>
+
+    <!-- Campaign Details -->
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Campaign Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="text-sm text-gray-500 mb-1">Script/Prompt</div>
+                <div class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                    {{ batch.base_prompt }}
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <div class="text-sm text-gray-500 mb-1">Voice Model</div>
+                    <div class="text-gray-900">{{ batch.voice|default:"Default" }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500 mb-1">AI Model</div>
+                    <div class="text-gray-900">{{ batch.model|default:"turbo" }}</div>
+                </div>
+                {% if total_duration %}
+                <div>
+                    <div class="text-sm text-gray-500 mb-1">Total Duration</div>
+                    <div class="text-gray-900">{{ total_duration|floatformat:0 }} seconds ({{ total_duration|floatformat:0|divisibleby:60 }} minutes)</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Calls List -->
+    <div class="bg-white rounded-lg border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Individual Calls</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Call ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Started</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for call in calls %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if call.contact %}
+                                <div class="text-sm font-medium text-gray-900">{{ call.contact.name }}</div>
+                            {% else %}
+                                <div class="text-sm text-gray-500">—</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ call.phone_number }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded
+                                {% if call.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif call.status == 'failed' %}bg-red-100 text-red-800
+                                {% elif call.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                {% elif call.status == 'initiated' %}bg-purple-100 text-purple-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ call.status|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if call.duration %}
+                                {{ call.duration|floatformat:0 }}s
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if call.bland_call_id %}
+                                <div class="text-xs text-gray-500 font-mono">{{ call.bland_call_id|truncatechars:12 }}</div>
+                            {% else %}
+                                <div class="text-xs text-gray-400">—</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if call.started_at %}
+                                {{ call.started_at|date:"H:i:s" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if call.error_message %}
+                                <button onclick="showError('{{ call.error_message|escapejs }}')" class="text-red-600 hover:text-red-800">
+                                    View Error
+                                </button>
+                            {% elif call.bland_call_id %}
+                                <button onclick="viewCallDetails('{{ call.bland_call_id }}')" class="text-purple-600 hover:text-purple-800">
+                                    View Details
+                                </button>
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            No calls found in this batch.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="error-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="relative bg-white rounded-lg max-w-lg w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Call Error</h3>
+                <button onclick="hideError()" class="text-gray-400 hover:text-gray-500">×</button>
+            </div>
+            <div id="error-content" class="bg-red-50 border border-red-200 rounded p-4 text-sm text-red-800"></div>
+            <div class="mt-4 flex justify-end">
+                <button onclick="hideError()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshStatus() {
+    location.reload();
+}
+
+function showError(message) {
+    document.getElementById('error-content').textContent = message;
+    document.getElementById('error-modal').classList.remove('hidden');
+}
+
+function hideError() {
+    document.getElementById('error-modal').classList.add('hidden');
+}
+
+function viewCallDetails(callId) {
+    // TODO: Implement call details view or link to Bland dashboard
+    alert('Call ID: ' + callId + '\n\nView this call in your Bland AI dashboard for full details.');
+}
+
+// Auto-refresh every 30 seconds if batch is processing
+{% if batch.status == 'processing' %}
+setTimeout(function() {
+    location.reload();
+}, 30000);
+{% endif %}
+</script>
+{% endblock %}

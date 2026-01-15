@@ -1,0 +1,327 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Create Bulk Call - CallFairy{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Create Bulk Call</h1>
+        <p class="mt-2 text-gray-600">Create a batch to call multiple contacts at once</p>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-lg p-8">
+        <form method="POST" action="{% url 'create_campaign' %}">
+            {% csrf_token %}
+            
+            <!-- Batch Label -->
+            <div class="mb-6">
+                <label for="label" class="block text-sm font-medium text-gray-700 mb-2">
+                    Bulk Call Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="label" name="label" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                       placeholder="Q1 Appointment Reminders">
+            </div>
+
+            <!-- Purpose Mode Toggle -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    Call Purpose Configuration <span class="text-red-500">*</span>
+                </label>
+                <div class="flex items-center space-x-6 mb-4">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" name="script_mode" value="same" checked class="mr-2" id="script-mode-same">
+                        <span class="text-sm">Same purpose for all contacts</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" name="script_mode" value="different" class="mr-2" id="script-mode-different">
+                        <span class="text-sm">Different purpose per contact</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Sample Purposes for Bulk Calling -->
+            <div class="mb-6" id="sample-purposes-container">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    💡 Sample Bulk Call Purposes (Click to use)
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <!-- Appointment Reminders -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are calling from the clinic to remind patients about their upcoming appointments. Confirm the appointment date and time, ask if they can make it, and offer to reschedule if needed. Be warm and professional.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">📅</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Appointment Reminders</p>
+                                <p class="text-xs text-gray-600 mt-1">Remind and confirm appointments</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Payment Follow-ups -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are calling about outstanding invoices. Politely remind about the overdue payment, ask if they would like to process payment now, and offer payment options. Be understanding and helpful.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">💳</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Payment Follow-ups</p>
+                                <p class="text-xs text-gray-600 mt-1">Collect outstanding payments</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Survey Calls -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are conducting a quick customer satisfaction survey. Ask about their recent experience with our service, rate it on a scale of 1-10, and gather feedback on what we can improve. Keep it brief and thank them for their time.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">📊</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Customer Surveys</p>
+                                <p class="text-xs text-gray-600 mt-1">Gather feedback and ratings</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Event Invitations -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are inviting customers to our exclusive VIP event next week. Share details about the event, special offers available, and ask if they can attend. Get their RSVP and answer any questions about the event.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">🎉</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Event Invitations</p>
+                                <p class="text-xs text-gray-600 mt-1">Invite to special events</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Product Updates -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are calling to inform customers about our new product features and updates. Explain the benefits, answer questions, and gauge their interest in upgrading their plan. Be informative and helpful.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">🆕</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Product Updates</p>
+                                <p class="text-xs text-gray-600 mt-1">Share new features</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Win-back Campaigns -->
+                    <button type="button" class="sample-purpose-btn text-left p-3 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-purpose="You are reaching out to customers who haven't used our service in a while. Let them know we miss them, share improvements we've made, and offer a special discount to come back. Be friendly and genuine.">
+                        <div class="flex items-start">
+                            <span class="text-xl mr-2">⭐</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Win-back Campaigns</p>
+                                <p class="text-xs text-gray-600 mt-1">Re-engage inactive customers</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Base Purpose (for same purpose) -->
+            <div class="mb-6" id="base-prompt-container">
+                <label for="base_prompt" class="block text-sm font-medium text-gray-700 mb-2">
+                    Purpose of the Call <span class="text-red-500">*</span>
+                </label>
+                <textarea id="base_prompt" name="base_prompt" rows="5" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="Describe the purpose of these calls. What should the AI communicate to each contact?"></textarea>
+                <p class="mt-1 text-xs text-gray-500">This purpose will be used for all calls in this bulk call batch.</p>
+            </div>
+
+            <!-- Per-Contact Purposes (hidden by default) -->
+            <div class="mb-6 hidden" id="per-contact-scripts-container">
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-purple-900">
+                        ℹ️ Select contacts below, then customize the call purpose for each one individually.
+                    </p>
+                </div>
+                <div id="contact-scripts-list" class="space-y-4">
+                    <!-- Dynamic contact purpose fields will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Select Contacts -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Contacts <span class="text-red-500">*</span>
+                </label>
+                <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto">
+                    <div class="mb-2">
+                        <input type="checkbox" id="select-all-contacts" class="rounded">
+                        <label for="select-all-contacts" class="ml-2 font-medium">Select All</label>
+                    </div>
+                    <div class="space-y-2">
+                        {% for contact in contacts %}
+                        <div class="flex items-center">
+                            <input type="checkbox" name="contact_ids" value="{{ contact.id }}" 
+                                   class="contact-checkbox rounded" id="contact-{{ contact.id }}">
+                            <label for="contact-{{ contact.id }}" class="ml-2 text-sm">
+                                {{ contact.name }} - {{ contact.phone_number }}
+                            </label>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-500 text-sm">No contacts available. <a href="{% url 'contacts_list' %}" class="text-purple-600">Add contacts first</a></p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                    <span id="selected-count">0</span> contacts selected
+                </p>
+            </div>
+
+            <!-- Configuration -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label for="voice" class="block text-sm font-medium text-gray-700 mb-2">Voice</label>
+                    <select id="voice" name="voice"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Default Voice</option>
+                        <option value="maya">Maya (Female)</option>
+                        <option value="josh">Josh (Male)</option>
+                        <option value="paige">Paige (Female)</option>
+                        <option value="ryan">Ryan (Male)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="max_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                        Max Duration (minutes)
+                    </label>
+                    <input type="number" id="max_duration" name="max_duration" min="1" max="30" value="5"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="flex items-center pt-8">
+                    <input type="checkbox" id="record" name="record" checked class="rounded">
+                    <label for="record" class="ml-2 block text-sm text-gray-900">Record All Calls</label>
+                </div>
+            </div>
+
+            <!-- Hidden field for model (always turbo) -->
+            <input type="hidden" name="model" value="turbo">
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'batches_list' %}" 
+                   class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="px-6 py-3 btn-primary text-white rounded-lg font-medium">
+                    <i class="fas fa-bullhorn mr-2"></i>
+                    Create Bulk Call
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const contactData = {
+        {% for contact in contacts %}
+        '{{ contact.id }}': {
+            name: '{{ contact.name|escapejs }}',
+            phone: '{{ contact.phone_number|escapejs }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Sample purpose buttons
+    $('.sample-purpose-btn').click(function() {
+        const purpose = $(this).data('purpose');
+        $('#base_prompt').val(purpose);
+        
+        // Visual feedback
+        $('.sample-purpose-btn').removeClass('border-purple-500 bg-purple-50');
+        $(this).addClass('border-purple-500 bg-purple-50');
+    });
+
+    // Script mode toggle
+    $('input[name="script_mode"]').change(function() {
+        const mode = $(this).val();
+        if (mode === 'same') {
+            $('#base-prompt-container').removeClass('hidden');
+            $('#sample-purposes-container').removeClass('hidden');
+            $('#per-contact-scripts-container').addClass('hidden');
+            $('#base_prompt').prop('required', true);
+        } else {
+            $('#base-prompt-container').addClass('hidden');
+            $('#sample-purposes-container').addClass('hidden');
+            $('#per-contact-scripts-container').removeClass('hidden');
+            $('#base_prompt').prop('required', false);
+            updateContactScriptFields();
+        }
+    });
+
+    // Select all contacts
+    $('#select-all-contacts').change(function() {
+        $('.contact-checkbox').prop('checked', $(this).is(':checked'));
+        updateSelectedCount();
+        if ($('#script-mode-different').is(':checked')) {
+            updateContactScriptFields();
+        }
+    });
+
+    // Update count when individual checkboxes change
+    $('.contact-checkbox').change(function() {
+        updateSelectedCount();
+        
+        // Update select all checkbox
+        const total = $('.contact-checkbox').length;
+        const checked = $('.contact-checkbox:checked').length;
+        $('#select-all-contacts').prop('checked', total === checked);
+        
+        // Update script fields if in different mode
+        if ($('#script-mode-different').is(':checked')) {
+            updateContactScriptFields();
+        }
+    });
+
+    function updateSelectedCount() {
+        const count = $('.contact-checkbox:checked').length;
+        $('#selected-count').text(count);
+    }
+
+    function updateContactScriptFields() {
+        const container = $('#contact-scripts-list');
+        container.empty();
+        
+        $('.contact-checkbox:checked').each(function() {
+            const contactId = $(this).val();
+            const contact = contactData[contactId];
+            
+            if (contact) {
+                const fieldHtml = `
+                    <div class="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-medium text-gray-900">
+                                <i class="fas fa-user text-purple-600 mr-2"></i>
+                                ${contact.name}
+                            </h4>
+                            <span class="text-sm text-gray-500">${contact.phone}</span>
+                        </div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            Purpose of call for this contact <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="contact_script_${contactId}" rows="3" required
+                                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                  placeholder="Enter the specific call script for ${contact.name}..."></textarea>
+                    </div>
+                `;
+                container.append(fieldHtml);
+            }
+        });
+        
+        if (container.children().length === 0) {
+            container.html('<p class="text-gray-500 text-sm text-center py-4">Select contacts above to add custom scripts</p>');
+        }
+    }
+});
+</script>
+{% endblock %}

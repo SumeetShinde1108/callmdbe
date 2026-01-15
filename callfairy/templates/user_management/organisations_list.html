@@ -1,0 +1,77 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Organisations - CallFairy{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-building mr-2"></i>Organisations
+            </h1>
+            <p class="text-gray-600 mt-2">Manage organisations and their settings</p>
+        </div>
+        {% if can_create %}
+        <a href="{% url 'organisation_create' %}" class="btn-primary text-white px-6 py-3 rounded-lg font-medium inline-flex items-center">
+            <i class="fas fa-plus mr-2"></i>Create Organisation
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for org in organisations %}
+    <div class="bg-white rounded-lg card-shadow p-6 hover:shadow-xl transition-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex-1">
+                <h3 class="text-xl font-bold text-gray-900 mb-1">{{ org.name }}</h3>
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-map-marker-alt mr-1"></i>{{ org.city|default:"No location" }}
+                </p>
+            </div>
+            <span class="px-3 py-1 text-xs font-semibold rounded-full {% if org.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                {% if org.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+        
+        {% if org.description %}
+        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ org.description }}</p>
+        {% endif %}
+        
+        <div class="border-t pt-4 space-y-2">
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-user-tie w-5"></i>
+                <span class="ml-2">
+                    {% if org.agent_user %}
+                        <span class="font-medium text-gray-900">{{ org.agent_user.user.name }}</span>
+                        <span class="text-gray-500">(Agent)</span>
+                    {% else %}
+                        <span class="text-orange-600">No agent assigned</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-users w-5"></i>
+                <span class="ml-2">{{ org.user_count }} member{{ org.user_count|pluralize }}</span>
+            </div>
+        </div>
+        
+        <div class="mt-4 flex space-x-2">
+            <a href="{% url 'organisation_detail' org.id %}" class="flex-1 text-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors">
+                View Details
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12">
+        <i class="fas fa-building text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg">No organisations found</p>
+        {% if can_create %}
+        <a href="{% url 'organisation_create' %}" class="btn-primary text-white px-6 py-2 rounded-lg font-medium inline-block mt-4">
+            <i class="fas fa-plus mr-2"></i>Create First Organisation
+        </a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

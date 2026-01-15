@@ -1,0 +1,133 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Calls - CallFairy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Calls History</h1>
+            <p class="mt-2 text-gray-600">View and manage all your calls</p>
+        </div>
+        <a href="{% url 'make_call' %}" class="inline-flex items-center px-4 py-2 btn-primary text-white rounded-lg font-medium">
+            <i class="fas fa-phone-alt mr-2"></i>
+            Make New Call
+        </a>
+    </div>
+
+    <!-- Filter Options -->
+    <div class="bg-white shadow rounded-lg p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <select id="status-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">All Statuses</option>
+                    <option value="queued">Queued</option>
+                    <option value="initiated">Initiated</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="md:col-span-3">
+                <input type="text" id="phone-search" placeholder="Search by phone number..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+            </div>
+        </div>
+    </div>
+
+    <!-- Calls Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="calls-tbody">
+                    {% for call in calls %}
+                    <tr class="call-row hover:bg-gray-50" data-status="{{ call.status }}" data-phone="{{ call.phone_number }}">
+                        <td class="px-6 py-4 font-medium text-gray-900">{{ call.phone_number }}</td>
+                        <td class="px-6 py-4 text-gray-500">
+                            {% if call.contact %}{{ call.contact.name }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                {% if call.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif call.status == 'failed' %}bg-red-100 text-red-800
+                                {% elif call.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ call.status|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">
+                            {% if call.duration %}{{ call.duration }}s{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 text-sm">
+                            {{ call.created_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm space-x-2">
+                            {% if call.recording_url %}
+                            <a href="{{ call.recording_url }}" target="_blank" class="text-blue-600 hover:text-blue-900" title="Recording">
+                                <i class="fas fa-play-circle"></i>
+                            </a>
+                            {% endif %}
+                            {% if call.transcript %}
+                            <button onclick="showTranscript('{{ call.id }}')" class="text-purple-600 hover:text-purple-900" title="Transcript">
+                                <i class="fas fa-file-alt"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="no-calls-row">
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            No calls found. <a href="{% url 'make_call' %}" class="text-purple-600 hover:text-purple-800">Make your first call</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functionality
+document.getElementById('status-filter').addEventListener('change', filterCalls);
+document.getElementById('phone-search').addEventListener('input', filterCalls);
+
+function filterCalls() {
+    const statusFilter = document.getElementById('status-filter').value.toLowerCase();
+    const phoneSearch = document.getElementById('phone-search').value.toLowerCase();
+    const rows = document.querySelectorAll('.call-row');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const status = row.dataset.status.toLowerCase();
+        const phone = row.dataset.phone.toLowerCase();
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesPhone = !phoneSearch || phone.includes(phoneSearch);
+        
+        if (matchesStatus && matchesPhone) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    const noCallsRow = document.getElementById('no-calls-row');
+    if (noCallsRow) {
+        noCallsRow.style.display = visibleCount === 0 ? '' : 'none';
+    }
+}
+</script>
+{% endblock %}

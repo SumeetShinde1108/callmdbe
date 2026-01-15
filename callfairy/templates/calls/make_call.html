@@ -1,0 +1,247 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Make Call - CallFairy{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Make AI Call</h1>
+        <p class="mt-2 text-gray-600">
+            {% if contact_name %}
+                Initiate call to <span class="font-semibold text-purple-600">{{ contact_name }}</span>
+            {% else %}
+                Initiate a single AI-powered voice call
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-lg p-8">
+        <form id="make-call-form" method="POST" action="{% url 'make_call' %}">
+            {% csrf_token %}
+            
+            <!-- Phone Number -->
+            <div class="mb-6">
+                <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number <span class="text-red-500">*</span>
+                </label>
+                <input type="tel" id="phone_number" name="phone_number" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                       placeholder="+1234567890"
+                       value="{{ prefilled_phone|default:'' }}">
+                <p class="mt-1 text-xs text-gray-500">Enter phone number in E.164 format (e.g., +12223334444)</p>
+            </div>
+
+            <!-- Sample Purposes -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    💡 Sample Call Purposes (Click to use)
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                    <!-- Appointment Reminder -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from HealthCare Clinic to remind the patient about their upcoming appointment. Here are the details: Doctor's appointment tomorrow at 2:00 PM with Dr. Sarah Johnson. Please confirm if they can make it to the appointment. If they need to reschedule, offer to check available times this week or next week. Be warm, friendly, and professional. If they have any questions about parking, location, or what to bring, provide helpful information.">
+                        <div class="flex items-start">
+                            <i class="fas fa-calendar-check text-2xl text-blue-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Appointment Reminder</p>
+                                <p class="text-xs text-gray-600 mt-1">Healthcare appointment confirmation and rescheduling</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Payment Reminder -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from Premium Services regarding their account. We noticed their recent invoice of $249.99 for subscription services is now 15 days overdue. Please remind them politely about the outstanding payment and ask if they would like to process the payment now over the phone, or if they need information about payment options. We accept credit cards, bank transfers, or online payment. If they're experiencing financial difficulties, mention that we have flexible payment plans available. Be understanding and helpful, not pushy.">
+                        <div class="flex items-start">
+                            <i class="fas fa-dollar-sign text-2xl text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Payment Reminder</p>
+                                <p class="text-xs text-gray-600 mt-1">Friendly payment follow-up with options</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Lead Qualification -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from TechSolutions, a software company. The person recently downloaded our free guide about 'Improving Business Productivity'. Thank them for their interest and ask if they found the guide helpful. Your goal is to understand their business needs: What challenges are they facing? How many team members do they have? What tools are they currently using? Based on their answers, gauge if they would be interested in a free 30-minute consultation with our product specialist. Be consultative, not salesy. Focus on understanding their needs first.">
+                        <div class="flex items-start">
+                            <i class="fas fa-user-check text-2xl text-purple-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Lead Qualification</p>
+                                <p class="text-xs text-gray-600 mt-1">Sales qualification and needs assessment</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Customer Feedback -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from Elegant Restaurant. They dined with us last week and we'd love to hear about their experience. Thank them for choosing our restaurant and ask about their visit: How was the food quality? Was the service up to their expectations? Was there anything we could have done better? Let them know we truly value their feedback as it helps us improve. If they had a great experience, kindly ask if they would consider leaving us a review on Google. If they had any issues, apologize sincerely and offer a 20% discount on their next visit as our way of making it right.">
+                        <div class="flex items-start">
+                            <i class="fas fa-comment-dots text-2xl text-orange-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Customer Feedback</p>
+                                <p class="text-xs text-gray-600 mt-1">Post-service satisfaction survey</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Event Invitation -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from Elite Fitness Center to invite them to our exclusive VIP Open House event this Saturday from 10 AM to 4 PM. As a valued community member, they're invited to tour our newly renovated facility, try our state-of-the-art equipment, meet our certified trainers, and enjoy complimentary healthy refreshments. There will also be free fitness assessments and wellness consultations. The best part - attendees will receive a special discount of 50% off their first month if they sign up during the event. Ask if they can make it and if they'd like to bring a friend or family member. RSVP is appreciated but not required.">
+                        <div class="flex items-start">
+                            <i class="fas fa-calendar-alt text-2xl text-red-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Event Invitation</p>
+                                <p class="text-xs text-gray-600 mt-1">VIP event invitation with special offer</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Delivery Notification -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from QuickShip Delivery regarding their package. Their order #ORD-78945 has been shipped and is currently out for delivery today between 2 PM and 6 PM. The tracking number is TRK-456789-US. Ask if someone will be available to receive the package, as a signature is required. If they won't be home, offer options: they can redirect it to a nearby pickup location, reschedule delivery for tomorrow, or leave special delivery instructions. Confirm their delivery address to ensure accuracy. Be helpful and efficient.">
+                        <div class="flex items-start">
+                            <i class="fas fa-shipping-fast text-2xl text-teal-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Delivery Notification</p>
+                                <p class="text-xs text-gray-600 mt-1">Package delivery confirmation and scheduling</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Insurance Follow-up -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from SecureLife Insurance Company. They recently requested a quote for life insurance coverage online. Thank them for their interest and confirm you have their information. Explain that based on their age and coverage needs, we can offer them a comprehensive $500,000 policy starting at just $45 per month. Ask about their current family situation and financial goals to ensure this coverage meets their needs. Offer to answer any questions about coverage details, beneficiaries, or the application process. If interested, offer to email them the full quote details and schedule a brief call with an insurance advisor. Be informative and patient, not pushy.">
+                        <div class="flex items-start">
+                            <i class="fas fa-shield-alt text-2xl text-indigo-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Insurance Follow-up</p>
+                                <p class="text-xs text-gray-600 mt-1">Insurance quote follow-up and consultation</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Win-back Campaign -->
+                    <button type="button" class="sample-script-btn text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all"
+                            data-script="You are calling from StreamMax, the streaming service. We noticed they cancelled their subscription 3 months ago and we'd love to have them back. Let them know we've made significant improvements since they left: we've added 200+ new movies, introduced 4K streaming on all plans, reduced buffering by 80%, and launched exclusive original series. As a thank you for being a previous customer, we'd like to offer them 2 months free if they rejoin, plus they can cancel anytime with no commitment. Ask what made them leave initially and address those concerns. Be friendly and genuinely interested in winning them back.">
+                        <div class="flex items-start">
+                            <i class="fas fa-undo-alt text-2xl text-pink-500 mr-3 mt-1"></i>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Win-back Campaign</p>
+                                <p class="text-xs text-gray-600 mt-1">Re-engage churned customers with special offer</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Purpose of the Call -->
+            <div class="mb-6">
+                <label for="task" class="block text-sm font-medium text-gray-700 mb-2">
+                    Purpose of the Call <span class="text-red-500">*</span>
+                </label>
+                <textarea id="task" name="task" rows="6" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          placeholder="Describe the purpose of this call. What should the AI agent communicate? Be specific about the objective, key information to convey, and desired outcome."></textarea>
+                <p class="mt-1 text-xs text-gray-500">Provide clear instructions for what the AI should communicate during the call.</p>
+            </div>
+
+            <!-- Configuration Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Voice -->
+                <div>
+                    <label for="voice" class="block text-sm font-medium text-gray-700 mb-2">
+                        Voice
+                    </label>
+                    <select id="voice" name="voice"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="">Default Voice</option>
+                        <option value="maya">Maya (Female)</option>
+                        <option value="josh">Josh (Male)</option>
+                        <option value="paige">Paige (Female)</option>
+                        <option value="ryan">Ryan (Male)</option>
+                    </select>
+                </div>
+
+                <!-- Max Duration -->
+                <div>
+                    <label for="max_duration" class="block text-sm font-medium text-gray-700 mb-2">
+                        Max Duration (minutes)
+                    </label>
+                    <input type="number" id="max_duration" name="max_duration" min="1" max="30" value="5"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+
+                <!-- Record -->
+                <div class="flex items-center pt-8">
+                    <input type="checkbox" id="record" name="record" checked
+                           class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                    <label for="record" class="ml-2 block text-sm text-gray-900">
+                        Record Call
+                    </label>
+                </div>
+            </div>
+
+            <!-- Hidden field for model (always turbo) -->
+            <input type="hidden" name="model" value="turbo">
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'dashboard' %}" 
+                   class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Cancel
+                </a>
+                <button type="submit" id="submit-btn"
+                        class="px-6 py-3 btn-primary text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                    <i class="fas fa-phone mr-2"></i>
+                    Initiate Call
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Sample script buttons
+    $('.sample-script-btn').click(function() {
+        var script = $(this).data('script');
+        $('#task').val(script);
+        
+        // Visual feedback
+        $('.sample-script-btn').removeClass('border-purple-500 bg-purple-50');
+        $(this).addClass('border-purple-500 bg-purple-50');
+    });
+
+    // Form submission
+    $('#make-call-form').submit(function(e) {
+        e.preventDefault();
+        
+        var $submitBtn = $('#submit-btn');
+        $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Initiating...');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                window.location.href = '{% url "calls_list" %}?success=Call initiated successfully';
+            },
+            error: function(xhr) {
+                $submitBtn.prop('disabled', false).html('<i class="fas fa-phone mr-2"></i> Initiate Call');
+                
+                var errorMsg = 'Failed to initiate call. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                
+                alert('Error: ' + errorMsg);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

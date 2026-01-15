@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Bulk Calling - CallFairy{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Bulk Calling</h1>
+            <p class="mt-2 text-gray-600">Manage your bulk call batches</p>
+        </div>
+        <a href="{% url 'create_campaign' %}" class="inline-flex items-center px-4 py-2 btn-primary text-white rounded-lg font-medium">
+            + Create Bulk Call
+        </a>
+    </div>
+
+    <!-- Bulk Calls List -->
+    <div class="space-y-4">
+        {% for batch in batches %}
+        <div class="bg-white shadow rounded-lg hover:shadow-md transition-shadow border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <!-- Left Side: Main Info -->
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <h3 class="text-xl font-semibold text-gray-900">{{ batch.label }}</h3>
+                            <span class="px-3 py-1 text-xs font-medium rounded-full
+                                {% if batch.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif batch.status == 'failed' %}bg-red-100 text-red-800
+                                {% elif batch.status == 'processing' %}bg-blue-100 text-blue-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ batch.status|title }}
+                            </span>
+                            {% if batch.status == 'processing' or batch.status == 'pending' %}
+                            <span class="text-sm text-blue-600">● In Progress</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-500 mb-1">Purpose of the Call:</div>
+                            <p class="text-sm text-gray-700">{{ batch.base_prompt|truncatewords:30 }}</p>
+                        </div>
+                        
+                        <div class="flex items-center space-x-6 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-500">Total:</span>
+                                <span class="font-semibold text-gray-900">{{ batch.total_contacts }}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-500">Successful:</span>
+                                <span class="font-semibold text-green-600">{{ batch.successful_calls }}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-500">Failed:</span>
+                                <span class="font-semibold text-red-600">{{ batch.failed_calls }}</span>
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                Created {{ batch.created_at|date:"M d, Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Actions -->
+                    <div class="ml-6">
+                        <a href="{% url 'batch_detail' batch.id %}" 
+                           class="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white shadow rounded-lg p-12 text-center border border-gray-200">
+            <div class="text-6xl text-gray-300 mb-4">📞</div>
+            <p class="text-gray-500 mb-4">No bulk calls yet. Create your first bulk call batch!</p>
+            <a href="{% url 'create_campaign' %}" class="inline-flex items-center px-6 py-3 btn-primary text-white rounded-lg font-medium">
+                + Create Bulk Call
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

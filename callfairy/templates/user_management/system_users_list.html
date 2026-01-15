@@ -1,0 +1,96 @@
+{% extends 'base/base.html' %}
+
+{% block title %}All Users - CallFairy{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">
+        <i class="fas fa-users-cog mr-2"></i>All System Users
+    </h1>
+    <p class="text-gray-600 mt-2">Complete list of all users in the system</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg card-shadow p-4">
+        <p class="text-sm text-gray-500">Total Users</p>
+        <p class="text-2xl font-bold text-gray-900">{{ total_users }}</p>
+    </div>
+    <div class="bg-white rounded-lg card-shadow p-4">
+        <p class="text-sm text-gray-500">SuperAdmins</p>
+        <p class="text-2xl font-bold text-purple-600">{{ superadmins }}</p>
+    </div>
+    <div class="bg-white rounded-lg card-shadow p-4">
+        <p class="text-sm text-gray-500">Agents</p>
+        <p class="text-2xl font-bold text-indigo-600">{{ agents }}</p>
+    </div>
+    <div class="bg-white rounded-lg card-shadow p-4">
+        <p class="text-sm text-gray-500">Regular Users</p>
+        <p class="text-2xl font-bold text-blue-600">{{ regular_users }}</p>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="bg-white rounded-lg card-shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Agent Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for u in users %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full flex items-center justify-center
+                                    {% if u.role == 'superadmin' %}bg-purple-100{% elif u.is_active_agent %}bg-indigo-100{% else %}bg-blue-100{% endif %}">
+                                    <i class="fas {% if u.role == 'superadmin' %}fa-crown text-purple-600{% elif u.is_active_agent %}fa-user-tie text-indigo-600{% else %}fa-user text-blue-600{% endif %}"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ u.name }}</div>
+                                <div class="text-sm text-gray-500">{{ u.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full 
+                            {% if u.role == 'superadmin' %}bg-purple-100 text-purple-800
+                            {% elif u.role == 'superuser' %}bg-indigo-100 text-indigo-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ u.get_role_display_name }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if u.is_active_agent %}
+                        <div class="text-sm">
+                            <div class="text-gray-900 font-medium">✓ Active Agent</div>
+                            <div class="text-gray-500">{{ u.managed_org.name }}</div>
+                        </div>
+                        {% else %}
+                        <span class="text-sm text-gray-500">Not an agent</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        {{ u.date_joined|date:"M d, Y" }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full 
+                            {% if u.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
